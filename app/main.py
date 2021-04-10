@@ -1,7 +1,11 @@
 from fastapi import FastAPI
+from fastapi import APIRouter
+from core.routers import repository
 
 
 app = FastAPI()
+
+app.include_router(repository.router)
 
 
 @app.get("/")
