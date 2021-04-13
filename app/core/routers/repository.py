@@ -20,9 +20,17 @@ def _request_github_api(user_name):
         return response.status_code
 
 
-def _get_repos_in_db(db: Session, auth_user_id: str):
-    return db.query(RepoDB).filter(
-        RepoDB.auth_id == auth_user_id).all()
+def _get_repos_in_db(db: Session, auth_user_id: str,
+                     only_starred_repos: bool = False):
+    if only_starred_repos:
+        repos_db = db.query(RepoDB).filter(
+            RepoDB.auth_id == auth_user_id,
+            RepoDB.is_starred_repo == True).all()
+    else:
+        repos_db = db.query(RepoDB).filter(
+            RepoDB.auth_id == auth_user_id).all()
+
+    return repos_db
 
 
 def _get_repos_in_github(user_name):
@@ -48,7 +56,8 @@ def _get_repo_by_id(db: Session, github_repo_id: int):
 
 
 def _get_repos_info(db: Session, auth_user_id: str):
-    repos = _get_repos_in_db(db=db, auth_user_id=auth_user_id)
+    repos = _get_repos_in_db(db=db, auth_user_id=auth_user_id,
+                             only_starred_repos=True)
     list_of_repos = []
     for repo in repos:
         repo_info = {
@@ -80,7 +89,6 @@ def _verify_starred_repo(db: Session, user_name: str):
             starred_repo.name = repo['name']
             starred_repo.description = repo['description']
             starred_repo.html_url = repo['html_url']
-            db.flush()
         else:
             db_repo = RepoDB(github_repo_id=repo['github_repo_id'],
                              auth_id=_get_user_auth_id(),
@@ -89,8 +97,6 @@ def _verify_starred_repo(db: Session, user_name: str):
                              description=repo['description'],
                              html_url=repo['html_url'])
             db.add(db_repo)
-            db.flush()
-
     db.commit()
     repos_info = _get_repos_info(db=db, auth_user_id=_get_user_auth_id())
 
