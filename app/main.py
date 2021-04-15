@@ -3,7 +3,6 @@ from fastapi import APIRouter
 from core.routers import auth, repository, tag
 from core.models.database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
-# from core.models.table import Auth
 
 app = FastAPI()
 
@@ -14,6 +13,7 @@ app.include_router(tag.router)
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "*"
 ]
 
 app.add_middleware(

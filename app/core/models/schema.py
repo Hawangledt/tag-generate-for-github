@@ -10,10 +10,12 @@ class AuthCreate(AuthSchema):
     pass
 
 
+class AuthCreateRequest(BaseModel):
+    github_nickname: str
+
+
 class Auth(AuthSchema):
     id: int
-    auth0_unique_id: str
-    github_nickname: str
 
     class Config:
         orm_mode = True
