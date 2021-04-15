@@ -26,6 +26,10 @@ class TagSchema(BaseModel):
     auth_id: int
 
 
+class TagCreateRequest(BaseModel):
+    name: str
+
+
 class TagCreate(TagSchema):
     pass
 
@@ -46,23 +50,6 @@ class RepoSchema(BaseModel):
     name: str
     description: str
     html_url: str
-
-
-class RepoCreate(TagSchema):
-    pass
-
-
-class Repo(TagSchema):
-    id: int
-    github_repo_id: int
-    auth_id: int
-    is_starred_repo: bool
-    name: str
-    description: str
-    html_url: str
-
-    class Config:
-        orm_mode = True
 
 
 class TagInRepoSchema(BaseModel):
