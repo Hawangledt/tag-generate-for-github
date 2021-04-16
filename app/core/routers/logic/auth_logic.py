@@ -3,7 +3,7 @@
     Returns:
         function: _get_user_auth_id, _get_auth, _create_auth
 """
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from core.models.table import AuthDB, TagDB, RepoDB, TagInRepoDB
 from core.models.schema import AuthCreate
