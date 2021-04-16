@@ -37,8 +37,8 @@ async def create_auth(auth_request: AuthCreateRequest,
                 name="Removes a user from database",
                 description="""Removes a user from database""",
                 response_model=Auth)
-async def remove_tag_in_repo(token: dict = Depends(required_auth),
-                             db: Session = Depends(get_db)):
+async def remove_user(token: dict = Depends(required_auth),
+                      db: Session = Depends(get_db)):
 
     auth0_unique_id = _get_user_auth0_id(token)
     db_auth = _remove_auth(auth0_unique_id=auth0_unique_id, db=db)

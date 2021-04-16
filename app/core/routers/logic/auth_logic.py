@@ -101,7 +101,7 @@ def _remove_auth(auth0_unique_id: str, db: Session):
 
     user_id = auth_db.id
 
-    tag_db = db.query(TagDB).filter(auth_id == auth_id).all()
+    tag_db = db.query(TagDB).filter(TagDB.auth_id == user_id).all()
     repo_db = db.query(RepoDB).filter(
         RepoDB.auth_id == user_id).all()
 
@@ -109,12 +109,14 @@ def _remove_auth(auth0_unique_id: str, db: Session):
         tags_in_repo_db = db.query(TagInRepoDB).filter(
             TagInRepoDB.repo_id == repo.id).all()
         for tag_in_repo in tags_in_repo_db:
-            db.delete(tag_in_repo_db)
+            db.query(TagInRepoDB).filter(
+                TagInRepoDB.id == tag_in_repo.id).delete()
 
-        db.delete(repo)
+        db.query(RepoDB).filter(
+            RepoDB.id == repo.id).delete()
 
     for tag in tag_db:
-        db.delete(tag)
+        db.query(TagDB).filter(TagDB.id == tag.id).delete()
 
     db.delete(auth_db)
     db.commit()
