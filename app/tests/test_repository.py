@@ -1,87 +1,35 @@
+import json
+import requests
 from fastapi.testclient import TestClient
 from app.main import app
+from app.tests.logic import FakeUser
 
 client = TestClient(app)
+fake_user = FakeUser(client)
 
 
-class TestUser:
-    def create_user():
-        fake_user = {
-            auth0_unique_id: "fake_auth0_id"
-            github_nickname: "fake_github_nickname"
-        }
-        response = client.get("/auth/new/",
-                              data=json.dumps(test_fake_auth))
-        return auth0_unique_id
-
-    def remove_user():
-        pass
-
-
-fake_user = TestUser()
-
-
-def test_api_gituhub_get_repos_success():
-    user_name = "Hawangledt"
-    response = client.get("/repos/get/{}".format(user_name))
-    assert response.status_code == 200
-    assert len(response.json()) > 0
-
-
-def test_api_gituhub_get_repos_failed():
-    user_name = "FakeNameForT&est"
-    response = client.get("/repos/get/{}".format(user_name))
-    assert response.status_code == 200
-    assert response.json() == 404
-
-
-# adicionar um repositório com estrela no banco de dados
 def test_add_starred_repos_in_db():
-    # add a fake user
-    fake_auth0_unique_id = fake_user.create_user()
-    # add a fake repo
-    test_request_payload = [
-        {
-            "id": 'any_integer',
-            "github_repo_id": 101,
-            "auth_id": fake_auth0_unique_id,
-            "is_starred_repo": True,
-        },
-    ]
-    test_response_payload = [
-        {
-            "id": 'any_integer',
-            "github_repo_id": 101,
-            "auth_id": fake_auth0_unique_id,
-            "is_starred_repo": True,
-        },
-    ]
+    fake_user.Create()
 
-    url = "/repos/{fake_auth0_unique_id}/add/".format(test_request_payload)
-    response = client.post(url,
-                           data=json.dumps(test_fake_repo))
-    assert response.status_code == 200
-    response_json = response.json()
-    test_response_payload['id'] = response_json['id']
-    assert response_json == test_response_payload
-    # delete a fake repo
-    # delete a fake user
-    fake_user.remove_user()
+    repos = client.get(
+        url="/repos/", headers=fake_user.headers)
 
-# adicionar os repositórios com estrela no banco de dados
-    # add a fake user
-    # add a fake repos list
-    # delete a fake repos list
-    # delete a fake user
+    user_name = "Hawangledt"
+    url = 'https://api.github.com/users/{user_name}/starred'.format(
+        user_name=user_name)
 
-    # verificar se os repositórios no bd ainda estão marcados com star
-    # se não estiver marked with star,
-    #        change state (is_starred_repo) to [False]
+    github_response = requests.get(url)
+    assert github_response.status_code == 200
 
-    # adicionar uma tag a um repositorio
-    # não deixar adicionar a mesma tag a um repositório
+    github_response_payload = github_response.json()
 
-    # remover uma tag de um repositorio
-    # não remover uma tag que não esta associada ao repositório
+    repos_in_db = fake_user.GetRepos()
 
-    # Pesquisar os repositórios passando o nome de uma tag
+    for github_repo in github_response_payload:
+        found_repo = False
+        for repo_db in repos_in_db:
+            if github_repo['id'] == repo_db['github_repo_id']:
+                found_repo = True
+        assert found_repo, "{} Not Found".format(github_repo['id'])
+
+    fake_user.Delete()
