@@ -1,13 +1,14 @@
 import json
+import os
 import requests
 from fastapi import Security, HTTPException, status
 from fastapi.security.api_key import APIKeyHeader
 from functools import wraps
 from jose import jwt
 
-AUTH0_DOMAIN = "https://dev-rawan.us.auth0.com/"
-API_AUDIENCE = "https://tag-generate-for-github.com/"
-ALGORITHMS = ["RS256"]
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "Auth0 Domain undefined")
+API_AUDIENCE = os.getenv("API_AUDIENCE", "Auth0 Api audience undefined")
+ALGORITHMS = os.getenv("ALGORITHMS", "Algorithms undefined")
 
 api_key = APIKeyHeader(name="authorization")
 
